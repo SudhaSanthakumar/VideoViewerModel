@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"  
+    xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/mvc  
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+	
+<!-- Enable AspectJ style of Spring AOP -->
+		<aop:aspectj-autoproxy proxy-target-class="true"/>
+		
+		 
+		<aop:config proxy-target-class="true"/> 
+
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix"> <value>/WEB-INF/jsp/</value> </property>
+		<property name="suffix"> <value>.jsp</value></property>
+	</bean>
+
+	
+	<bean id="ds" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+	
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://localhost:3306/youtubemanagement"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="0000"></property>
+	
+	</bean>
+	
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate5.HibernateTemplate">
+	<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+	<property name="dataSource" ref="ds"></property>
+	<property name="annotatedClasses">
+	<list>
+		<value>com.youtube.model.Tag</value>
+		<value>com.youtube.model.Video</value>
+		<value>com.youtube.model.Channel</value>
+		<value>com.youtube.model.Comment</value>
+		<value>com.youtube.model.Reply</value>
+		<value>com.youtube.model.History</value>
+		<value>com.youtube.model.User</value>
+	</list>
+	</property>
+	<property name="hibernateProperties">
+	<props>
+	<prop key="hibernate.dialect" >org.hibernate.dialect.MySQL5Dialect</prop>
+     		 <!-- removing this makes @transactional work
+     		 <prop key="hibernate.current_session_context_class" >thread</prop>
+     		 -->
+     		 <!-- <prop key="hibernate.current_session_context_class" >thread</prop> -->
+     		<prop key="hibernate.show_sql">true</prop>
+     		<prop key="hibernate.hbm2ddl.auto">update</prop>
+	</props>
+	</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+	<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean> 
+	<context:annotation-config/>
+<context:component-scan base-package="com.youtube"></context:component-scan>
+<tx:annotation-driven proxy-target-class="true" transaction-manager="transactionManager"/>
+
+<mvc:resources mapping="/resources/**" location="/resources/css/"  
+	cache-period="31556926"/>
+
+
+<mvc:annotation-driven/>
+	
+	<mvc:interceptors>
+
+  <bean id="loggingInterceptor" class="com.youtube.interceptor.LoggingInterceptor"></bean>
+  
+	<!-- This XML will apply interceptor to only configured URIs different 
+	interceptor for different uri and a list of interceptors can be specified-->
+     <!--
+     <mvc:interceptor>
+          <mvc:mapping path="/users"></mvc:mapping>
+          <bean class="com.howtodoinjava.interceptor.DemoInterceptor"></bean>
+     <mvc:interceptor>
+      -->
+</mvc:interceptors>
+	
+
+
+
+
+</beans>
